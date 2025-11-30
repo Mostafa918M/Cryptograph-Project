@@ -1,25 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <script type="module" src="js/app.js"></script>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-  <select id="cipherSelect"></select>
-  
-  <h1 id="cipherName"></h1>
-  <p id="cipherDescription"></p>
-  
-  <div id="paramsContainer"></div>
-  <h4 id="modeDisplay"></h4>
-  <h3>Input Text</h3>
-  <textarea class="input" id="plainInput" placeholder="Enter text to encrypt/decrypt..." maxlength="50"></textarea>
-<button id="swapModeBtn"></button>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <select id="cipherSelect"></select>
 
-  <h3>Output Result</h3>
-  <textarea class="input" id="result" readonly></textarea>
-</body>
+    <h1 id="cipherName"></h1>
+    <p id="cipherDescription"></p>
+
+    <div id="paramsContainer"></div>
+    <h4 id="modeDisplay"></h4>
+    <h3>Input Text</h3>
+    <textarea
+      class="input"
+      id="plainInput"
+      placeholder="Enter text to encrypt/decrypt..."
+      maxlength="50"
+    ></textarea>
+    <button id="swapModeBtn"></button>
+
+    <h3>Output Result</h3>
+    <textarea class="input" id="result" readonly></textarea>
+    <script type="module" src="js/app.js"></script>
+  </body>
 </html>
