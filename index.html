@@ -3,23 +3,140 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Cipher Tool</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script type="module" src="js/app.js"></script>
     <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-  <select id="cipherSelect"></select>
-  
-  <h1 id="cipherName"></h1>
-  <p id="cipherDescription"></p>
-  
-  <div id="paramsContainer"></div>
-  <h4 id="modeDisplay"></h4>
-  <h3>Input Text</h3>
-  <textarea class="input" id="plainInput" placeholder="Enter text to encrypt/decrypt..." maxlength="50"></textarea>
-<button id="swapModeBtn"></button>
+    <style>
+      /* Custom scrollbar for textareas */
+      textarea::-webkit-scrollbar {
+        width: 6px;
+      }
+      textarea::-webkit-scrollbar-track {
+        background: #f1f5f9;
+      }
+      textarea::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 3px;
+      }
+      textarea::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+    </style>
+  </head>
+  <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-4 md:p-6">
+    <div class="max-w-4xl mx-auto">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Cipher Toolkit</h1>
+        <p class="text-gray-600">Encrypt and decrypt messages with various cipher algorithms</p>
+      </div>
 
-  <h3>Output Result</h3>
-  <textarea class="input" id="result" readonly></textarea>
-</body>
+      <!-- Cipher Selection Card -->
+      <div class="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-200">
+        <label for="cipherSelect" class="block text-sm font-medium text-gray-700 mb-2">
+          Select Cipher Algorithm
+        </label>
+        <select 
+          id="cipherSelect" 
+          class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+        >
+          <option value="">Choose a cipher...</option>
+        </select>
+      </div>
+
+      <!-- Cipher Info Card -->
+      <div class="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-200">
+        <h2 id="cipherName" class="text-2xl font-bold text-gray-800 mb-3">Select a cipher to begin</h2>
+        <p id="cipherDescription" class="text-gray-600 leading-relaxed">
+          Choose a cipher algorithm from the dropdown above to see its description and parameters.
+        </p>
+      </div>
+
+      <!-- Parameters Card -->
+      <div id="paramsContainer" class="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-200">
+        <!-- Parameters will be injected here -->
+        <p class="text-gray-500 text-center">Cipher parameters will appear here</p>
+      </div>
+
+      <!-- Mode Display -->
+      <div class="text-center mb-6">
+        <h4 id="modeDisplay" class="text-lg font-semibold text-gray-700 bg-blue-100 inline-block px-4 py-2 rounded-full">
+          Ready
+        </h4>
+      </div>
+
+      <!-- Input/Output Section -->
+      <div class="grid md:grid-cols-2 gap-6 mb-6">
+        <!-- Input Card -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Input Text</h3>
+            <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded" id="charCount">0/50</span>
+          </div>
+          <textarea 
+            class="input w-full h-40 px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none transition-all duration-200"
+            id="plainInput" 
+            placeholder="Enter text to encrypt/decrypt..."
+            maxlength="50"
+          ></textarea>
+        </div>
+
+        <!-- Output Card -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Output Result</h3>
+            <button 
+              onclick="copyToClipboard()" 
+              class="text-xs text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-lg transition-colors duration-200"
+            >
+              Copy
+            </button>
+          </div>
+          <textarea 
+            class="input w-full h-40 px-4 py-3 bg-gray-100 border border-gray-300 rounded-xl text-gray-800 resize-none cursor-not-allowed"
+            id="result" 
+            readonly
+            placeholder="Results will appear here..."
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Mode Switch Button -->
+      <div class="text-center">
+        <button 
+          id="swapModeBtn"
+          class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+        >
+          Switch Mode
+        </button>
+      </div>
+    </div>
+
+    <script>
+      // Character counter for input
+      document.getElementById('plainInput').addEventListener('input', function(e) {
+        document.getElementById('charCount').textContent = e.target.value.length + '/50';
+      });
+
+      // Copy to clipboard function
+      function copyToClipboard() {
+        const resultTextarea = document.getElementById('result');
+        resultTextarea.select();
+        document.execCommand('copy');
+        
+        // Visual feedback
+        const copyBtn = event.target;
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = 'Copied!';
+        copyBtn.classList.add('bg-green-100', 'text-green-600');
+        
+        setTimeout(() => {
+          copyBtn.textContent = originalText;
+          copyBtn.classList.remove('bg-green-100', 'text-green-600');
+        }, 2000);
+      }
+    </script>
+  </body>
 </html>
