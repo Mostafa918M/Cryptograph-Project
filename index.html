@@ -1,144 +1,214 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cipher Toolkit</title>
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cipher Tool</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script type="module" src="js/app.js"></script>
-    <link rel="stylesheet" href="css/style.css">
-    <style>
-      /* Custom scrollbar for textareas */
-      textarea::-webkit-scrollbar {
-        width: 6px;
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#00ff9d',
+            secondary: '#7000ff',
+            dark: '#0a0a0a',
+            panel: '#111111',
+            border: '#333333'
+          },
+          fontFamily: {
+            mono: ['"JetBrains Mono"', 'monospace'],
+            sans: ['Inter', 'sans-serif']
+          }
+        }
       }
-      textarea::-webkit-scrollbar-track {
-        background: #f1f5f9;
-      }
-      textarea::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 3px;
-      }
-      textarea::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
-      }
-    </style>
-  </head>
-  <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-4 md:p-6">
-    <div class="max-w-4xl mx-auto">
-      <!-- Header -->
-      <div class="text-center mb-8">
-        <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Cipher Toolkit</h1>
-        <p class="text-gray-600">Encrypt and decrypt messages with various cipher algorithms</p>
+    }
+  </script>
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/custom.css">
+  <link rel="stylesheet" href="css/themes.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <script type="module" src="js/app.js"></script>
+</head>
+
+<body class="bg-dark text-gray-200 font-sans h-screen overflow-hidden flex flex-col">
+
+  <header class="h-14 border-b border-border bg-panel flex items-center px-6 justify-between shrink-0">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-black font-bold text-lg">
+        C
       </div>
+      <h1 class="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-white">
+        Cipher<span class="font-light text-gray-400">Toolkit</span>
+      </h1>
+    </div>
+    <div class="flex items-center gap-4 text-sm text-gray-400">
+      <span>v1.0.0</span>
+      <a href="https://github.com/Mostafa918M/Cryptograph-Project" target="_blank" class="hover:text-primary transition-colors">GitHub</a>
+    </div>
+  </header>
 
-      <!-- Cipher Selection Card -->
-      <div class="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-200">
-        <label for="cipherSelect" class="block text-sm font-medium text-gray-700 mb-2">
-          Select Cipher Algorithm
+  <main class="flex-1 flex overflow-hidden">
+
+    <aside class="w-64 border-r border-border bg-panel flex flex-col shrink-0">
+      <div class="p-4 border-b border-border space-y-3">
+        <label for="cipherSelect" class="block text-xs font-mono text-gray-500 uppercase tracking-wider">
+          Cipher Algorithm
         </label>
-        <select 
-          id="cipherSelect" 
-          class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+        <select
+          id="cipherSelect"
+          class="w-full bg-black/50 border border-border rounded px-3 py-2 text-sm focus:outline-none focus:border-primary transition-colors text-gray-200"
         >
           <option value="">Choose a cipher...</option>
         </select>
       </div>
 
-      <!-- Cipher Info Card -->
-      <div class="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-200">
-        <h2 id="cipherName" class="text-2xl font-bold text-gray-800 mb-3">Select a cipher to begin</h2>
-        <p id="cipherDescription" class="text-gray-600 leading-relaxed">
-          Choose a cipher algorithm from the dropdown above to see its description and parameters.
-        </p>
+      <div id="cipher-list" class="flex-1 overflow-y-auto p-2 space-y-1 text-xs text-gray-500">
       </div>
+    </aside>
 
-      <!-- Parameters Card -->
-      <div id="paramsContainer" class="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-200">
-        <!-- Parameters will be injected here -->
-        <p class="text-gray-500 text-center">Cipher parameters will appear here</p>
-      </div>
+    <section class="flex-1 flex flex-col min-w-0 bg-dark relative">
+      <div class="flex-1 flex flex-col p-6 gap-6 overflow-y-auto">
 
-      <!-- Mode Display -->
-      <div class="text-center mb-6">
-        <h4 id="modeDisplay" class="text-lg font-semibold text-gray-700 bg-blue-100 inline-block px-4 py-2 rounded-full">
-          Ready
-        </h4>
-      </div>
-
-      <!-- Input/Output Section -->
-      <div class="grid md:grid-cols-2 gap-6 mb-6">
-        <!-- Input Card -->
-        <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-800">Input Text</h3>
-            <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded" id="charCount">0/50</span>
-          </div>
-          <textarea 
-            class="input w-full h-40 px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none transition-all duration-200"
-            id="plainInput" 
-            placeholder="Enter text to encrypt/decrypt..."
-            maxlength="50"
-          ></textarea>
+        <div class="bg-panel border border-border rounded-xl p-4 space-y-2">
+          <h2 id="cipherName" class="text-lg font-semibold text-white">
+            Select a cipher to begin
+          </h2>
+          <p id="cipherDescription" class="text-sm text-gray-400 leading-relaxed">
+            Choose a cipher algorithm from the left panel to see its description and parameters.
+          </p>
         </div>
 
-        <!-- Output Card -->
-        <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-800">Output Result</h3>
-            <button 
-              onclick="copyToClipboard()" 
-              class="text-xs text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-lg transition-colors duration-200"
+        <div class="flex flex-col gap-2 relative group">
+          <div class="flex justify-between items-center">
+            <label class="text-xs font-mono text-gray-500 uppercase tracking-wider">Input Text</label>
+            <span id="charCount" class="text-xs text-gray-600">0/50</span>
+          </div>
+          <textarea
+            id="plainInput"
+            maxlength="50"
+            class="w-full h-32 bg-panel border border-border rounded p-4 font-mono text-sm focus:outline-none focus:border-primary transition-colors resize-none placeholder-gray-700 text-gray-200"
+            placeholder="Enter text to encrypt/decrypt..."
+          ></textarea>
+          <div class="absolute right-2 bottom-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+            <button
+              type="button"
+              id="clear-input"
+              class="p-1 hover:text-white text-gray-500"
+              title="Clear"
+              onclick="document.getElementById('plainInput').value=''; document.getElementById('charCount').textContent='0/50';"
             >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-center gap-4 py-2">
+          <button
+            type="button"
+            class="bg-panel border border-border px-4 py-1.5 rounded-full text-xs font-medium flex items-center gap-2 text-gray-300"
+          >
+            <span class="text-primary" id="modeDisplay">Ready</span>
+          </button>
+
+          <button
+            id="swapModeBtn"
+            type="button"
+            class="bg-primary hover:bg-green-400 text-black font-bold px-8 py-2 rounded-full shadow-[0_0_15px_rgba(0,255,157,0.3)] hover:shadow-[0_0_25px_rgba(0,255,157,0.5)] transition-all flex items-center gap-2"
+          >
+            <span>Switch Mode</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="flex flex-col gap-2 relative group">
+          <div class="flex justify-between items-center">
+            <label class="text-xs font-mono text-gray-500 uppercase tracking-wider">Output Result</label>
+            <button
+              type="button"
+              id="copy-btn"
+              class="text-xs text-primary hover:text-white transition-colors flex items-center gap-1"
+              onclick="copyToClipboard()"
+            >
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+              </svg>
               Copy
             </button>
           </div>
-          <textarea 
-            class="input w-full h-40 px-4 py-3 bg-gray-100 border border-gray-300 rounded-xl text-gray-800 resize-none cursor-not-allowed"
-            id="result" 
+          <textarea
+            id="result"
             readonly
+            class="w-full h-32 bg-panel border border-border rounded p-4 font-mono text-sm focus:outline-none focus:border-secondary transition-colors resize-none text-primary"
             placeholder="Results will appear here..."
           ></textarea>
         </div>
+
+        <div class="flex-1 flex flex-col min-h-0 bg-panel border border-border rounded overflow-hidden">
+          <div class="flex border-b border-border">
+            <!-- <button class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-primary text-white transition-colors">
+              Visualization
+            </button>
+            <button class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-300 transition-colors">
+              Steps
+            </button>
+            <button class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-300 transition-colors">
+              Theory
+            </button> -->
+          </div>
+          <div class="flex-1 overflow-y-auto p-4 relative" id="tab-content">
+            <!-- <div id="view-visualization" class="space-y-4 text-sm text-gray-400">
+              <p>Visualization area for your cipher will appear here in future versions.</p>
+            </div> -->
+            <div id="view-steps" class="hidden space-y-2 font-mono text-xs"></div>
+            <div id="view-theory" class="hidden prose prose-invert prose-sm max-w-none text-gray-300"></div>
+          </div>
+        </div>
+
       </div>
+    </section>
 
-      <!-- Mode Switch Button -->
-      <div class="text-center">
-        <button 
-          id="swapModeBtn"
-          class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
-        >
-          Switch Mode
-        </button>
+    <aside class="w-72 border-l border-border bg-panel flex flex-col shrink-0">
+      <div class="p-4 border-b border-border">
+        <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-400">Parameters</h2>
       </div>
-    </div>
+      <div id="paramsContainer" class="flex-1 overflow-y-auto p-4 space-y-4">
+        <p class="text-xs text-gray-500">Cipher parameters will appear here.</p>
+      </div>
+    </aside>
 
-    <script>
-      // Character counter for input
-      document.getElementById('plainInput').addEventListener('input', function(e) {
-        document.getElementById('charCount').textContent = e.target.value.length + '/50';
-      });
+  </main>
 
-      // Copy to clipboard function
-      function copyToClipboard() {
-        const resultTextarea = document.getElementById('result');
-        resultTextarea.select();
-        document.execCommand('copy');
-        
-        // Visual feedback
-        const copyBtn = event.target;
-        const originalText = copyBtn.textContent;
-        copyBtn.textContent = 'Copied!';
-        copyBtn.classList.add('bg-green-100', 'text-green-600');
-        
-        setTimeout(() => {
-          copyBtn.textContent = originalText;
-          copyBtn.classList.remove('bg-green-100', 'text-green-600');
-        }, 2000);
-      }
-    </script>
+  <script>
+    const plainInput = document.getElementById('plainInput');
+    const charCount = document.getElementById('charCount');
 
-  </body>
+    plainInput.addEventListener('input', function(e) {
+      charCount.textContent = e.target.value.length + '/50';
+    });
+
+    function copyToClipboard() {
+      const resultTextarea = document.getElementById('result');
+      resultTextarea.select();
+      document.execCommand('copy');
+
+      const copyBtn = document.getElementById('copy-btn');
+      const originalText = copyBtn.textContent.trim();
+      copyBtn.textContent = 'Copied!';
+      copyBtn.classList.add('text-green-400');
+
+      setTimeout(() => {
+        copyBtn.textContent = originalText;
+        copyBtn.classList.remove('text-green-400');
+      }, 2000);
+    }
+  </script>
+</body>
 </html>

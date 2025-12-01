@@ -30,7 +30,7 @@ function playfairDecrypt(ciphertext, keyword) {
     let result = [];
     let steps = [];
     //implement here
-
+    console.log("Decrypting with Playfair Cipher");
     ciphertext = ciphertext.toLowerCase().replace(/j/g, 'i').replace(/[^a-z]/g, '');
 
     const matrix = createMatrix(keyword);
