@@ -1,9 +1,9 @@
 import { getCipherById } from "./registry.js";
 
 export const state = {
-  selectedCipherId: "caesar",
+  selectedCipherId: "affine",
   mode: "encrypt",
-  params: { shift: 3 },
+  params: { a: 5, b: 8 },
   plaintext: "",
   ciphertext: "",
   paramsByCipher: {},

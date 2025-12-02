@@ -28,19 +28,19 @@ function playfairEncrypt(plaintext, keyword) {
 
 function playfairDecrypt(ciphertext, keyword) {
     let result = [];
-    let steps = [];
-    //implement here
-    console.log("Decrypting with Playfair Cipher");
+    let steps = [`Decrypting "${ciphertext}" with keyword "${keyword}"`];
     ciphertext = ciphertext.toLowerCase().replace(/j/g, 'i').replace(/[^a-z]/g, '');
 
     const matrix = createMatrix(keyword);
     const pairs = splitIntoPairs(ciphertext);
 
     pairs.forEach(pair => {
-        const converted = convert(pair, matrix, "encrypt");
+        const converted = convert(pair, matrix, "decrypt");
         result.push(converted.first);
         result.push(converted.second);
     });
 
-    return { result: result.join(''), steps };
+    let finalResult = result.join('');
+    steps.push(`Result: "${finalResult}"`);
+    return { result: finalResult, steps };
 }

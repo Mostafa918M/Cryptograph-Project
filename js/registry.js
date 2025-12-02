@@ -1,10 +1,9 @@
-import  ceaser  from "./Chipers/ceaser.js";
-import autokey from "./Chipers/autokey.js";
-import hillcliming from "./Chipers/hillcliming.js";
-import affin from "./Chipers/affin.js";
-import playfair from "./Chipers/playfair.js";
+import affine from "./Ciphers/affin.js";
+import playfair from "./Ciphers/playfair.js";
+import vernam from "./Ciphers/vernam.js";
+import railfence from "./Ciphers/railfence.js";
 
-export const CHIPHERS = [ceaser, autokey, hillcliming, affin, playfair];
+export const CHIPHERS = [affine, playfair, vernam, railfence];
 
 export function getCipherById(id) {
     return CHIPHERS.find(cipher => cipher.id === id);
