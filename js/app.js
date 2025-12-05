@@ -109,28 +109,25 @@ cipherSelect.addEventListener("change", e => {
 
 });
 
+function renderSteps(steps) {
+  stepsContainer.classList.remove("hidden"); // make it visible
+  stepsContainer.innerHTML = steps
+    .map(
+      (st, i) =>
+        `<div class="border-b border-gray-800 py-1 flex gap-4">
+           <span class="text-gray-500 w-6">${i + 1}.</span>
+           <span class="text-primary">${st.description}</span>
+         </div>`
+    )
+    .join("");
+}
+
 plainInput.addEventListener("input", e => {
   setState({ plaintext: e.target.value });
-    stepsContainer.value = state.steps.map(step =>{if (typeof step === "string") {
-      return step;  
-    }
-    let line = step.description || "";
-    if (step.input != null) line += ` | Input: ${step.input}`;
-    if (step.output != null) line += ` | Output: ${step.output}`;
-    return line;
-  })
-  .join("\n");
+  renderSteps(state.steps);
 });
 
 swapModeBtn.addEventListener("click", () => {
   setMode(state.mode === "encrypt" ? "decrypt" : "encrypt");
-  stepsContainer.value = state.steps.map(step =>{if (typeof step === "string") {
-      return step;  
-    }
-    let line = step.description || "";
-    if (step.input != null) line += ` | Input: ${step.input}`;
-    if (step.output != null) line += ` | Output: ${step.output}`;
-    return line;
-  })
-  .join("\n");
+  renderSteps(state.steps);
 });
