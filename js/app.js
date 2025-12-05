@@ -10,6 +10,7 @@ const modeDisplay = document.querySelector("#modeDisplay");
 const plainInput = document.querySelector("#plainInput");
 const result = document.querySelector("#result");
 const swapModeBtn = document.querySelector("#swapModeBtn");
+const stepsContainer = document.querySelector("#view-steps");
 
 
 function renderCipherOptions() {
@@ -88,6 +89,7 @@ swapModeBtn.textContent = state.mode === "encrypt" ? "Switch to Decrypt" : "Swit
     result.textContent = out.result ?? "";
     state.ciphertext = out.result ?? "";
     state.steps = out.steps ?? [];
+ 
   } else {
     result.textContent = out ?? "";
     state.ciphertext = out ?? "";
@@ -109,9 +111,26 @@ cipherSelect.addEventListener("change", e => {
 
 plainInput.addEventListener("input", e => {
   setState({ plaintext: e.target.value });
-    console.log(state);
+    stepsContainer.value = state.steps.map(step =>{if (typeof step === "string") {
+      return step;  
+    }
+    let line = step.description || "";
+    if (step.input != null) line += ` | Input: ${step.input}`;
+    if (step.output != null) line += ` | Output: ${step.output}`;
+    return line;
+  })
+  .join("\n");
 });
 
 swapModeBtn.addEventListener("click", () => {
   setMode(state.mode === "encrypt" ? "decrypt" : "encrypt");
+  stepsContainer.value = state.steps.map(step =>{if (typeof step === "string") {
+      return step;  
+    }
+    let line = step.description || "";
+    if (step.input != null) line += ` | Input: ${step.input}`;
+    if (step.output != null) line += ` | Output: ${step.output}`;
+    return line;
+  })
+  .join("\n");
 });

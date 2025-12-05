@@ -151,11 +151,11 @@
           <div class="flex border-b border-border">
             <!-- <button class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-primary text-white transition-colors">
               Visualization
-            </button>
+            </button> -->
             <button class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-300 transition-colors">
               Steps
             </button>
-            <button class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-300 transition-colors">
+            <!-- <button class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-300 transition-colors">
               Theory
             </button> -->
           </div>
@@ -163,7 +163,12 @@
             <!-- <div id="view-visualization" class="space-y-4 text-sm text-gray-400">
               <p>Visualization area for your cipher will appear here in future versions.</p>
             </div> -->
-            <div id="view-steps" class="hidden space-y-2 font-mono text-xs"></div>
+            <textarea
+            id="view-steps"
+            readonly
+            class="w-full h-32 bg-panel border border-border rounded p-4 font-mono text-sm focus:outline-none focus:border-secondary transition-colors resize-none text-primary"
+            placeholder="Steps will appear here..."
+          ></textarea>
             <div id="view-theory" class="hidden prose prose-invert prose-sm max-w-none text-gray-300"></div>
           </div>
         </div>
