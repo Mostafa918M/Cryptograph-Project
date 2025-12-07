@@ -146,6 +146,7 @@ function renderSteps(steps) {
         )
         .join("");
 }
+
 async function renderVisualization() {
     const text = state.plaintext;
     const params = getActiveParams();

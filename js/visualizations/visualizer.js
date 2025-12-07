@@ -1,3 +1,6 @@
+import { modInverse } from "./affine.js";
+import { generatePlayfairGrid, createPlayfairGrid, findPosition, highlightPlayfairCells, clearPlayfairHighlights } from "./playfair.js"
+
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -16,7 +19,8 @@ function removeClasses(element, styleClasses) {
 }
 
 function animate(element, animationName, time) {
-    element.style.animation = `${animationName} ${time}ms ease-in-out infinite`;
+
+    element.style.animation = `${animationName} ${time}ms ease-in-out`;
 
     setTimeout(() => {
         element.style.animation = "";
@@ -46,15 +50,6 @@ function createElement(type, initialValue = "") {
     return element;
 }
 
-function modInverse(a, m) {
-    for (let i = 1; i < m; i++) {
-        if ((a * i) % m === 1) {
-            return i;
-        }
-    }
-    return null;
-}
-
 const cipherVisualizations = {
     "affine": {
         encrypt: async function*(inputText, { a, b }) {
@@ -77,6 +72,7 @@ const cipherVisualizations = {
             };
 
             await sleep(1000);
+            yield visualizationElement;
 
             for (const characterElement of inputCharacterCollection.children) {
                 const character = characterElement.textContent;
@@ -93,6 +89,7 @@ const cipherVisualizations = {
             };
 
             await sleep(1000);
+            yield visualizationElement;
 
             const equationElement = createElement("box");
 
@@ -115,6 +112,7 @@ const cipherVisualizations = {
             equationElement.appendChild(createElement("span", ") % 26"));
             animate(equationElement, "slideIn", 500);
             await sleep(800);
+            yield visualizationElement;
 
 
             const outputCharacterCollection = createElement("raw-container");
@@ -154,6 +152,7 @@ const cipherVisualizations = {
                 animate(outputCharacterElement, "glow", 500);
                 await sleep(800);
             };
+            yield visualizationElement;
 
             i = 0;
             for (const characterElement of outputCharacterCollection.children) {
@@ -195,6 +194,7 @@ const cipherVisualizations = {
             };
 
             await sleep(1000);
+            yield visualizationElement;
 
             for (const characterElement of inputCharacterCollection.children) {
                 const character = characterElement.textContent;
@@ -223,6 +223,7 @@ const cipherVisualizations = {
             visualizationElement.appendChild(modInverseEquationElement);
             animate(modInverseEquationElement, "slideIn", 500);
             await sleep(800);
+            yield visualizationElement;
 
             let aInv = modInverse(a, 26);
 
@@ -235,7 +236,7 @@ const cipherVisualizations = {
             animate(modInverseEquationElement, "slideOut", 500);
             await sleep(500);
             visualizationElement.removeChild(modInverseEquationElement);
-            
+
             const equationElement = createElement("box");
 
             visualizationElement.appendChild(equationElement);
@@ -256,6 +257,7 @@ const cipherVisualizations = {
             equationElement.appendChild(createElement("span", ")) % 26"));
             animate(equationElement, "slideIn", 500);
             await sleep(800);
+            yield visualizationElement;
 
 
 
@@ -297,6 +299,7 @@ const cipherVisualizations = {
                 await sleep(800);
             };
 
+            yield visualizationElement;
             i = 0;
             for (const characterElement of outputCharacterCollection.children) {
                 const asciiOffset = asciiOffsets[i++];
@@ -319,6 +322,293 @@ const cipherVisualizations = {
         }
     },
     playfair: {
+        encrypt: async function*(plaintext, { keyword }) {
+            const vis = createElement("visualizer");
+            yield vis;
+
+            const cleanKey = keyword.toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+            const text = plaintext.toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+
+            const grid = generatePlayfairGrid(cleanKey);
+            const gridEl = createPlayfairGrid(grid);
+            vis.appendChild(gridEl);
+            yield vis;
+
+            const plaintextRow = createElement("raw-container");
+            plaintextRow.classList.add("vis-mb-md");
+            for (let i = 0; i < text.length; i++) {
+                const char = createElement("box", text[i]);
+                char.classList.add("vis-char", "plaintext", "borderless");
+                if (i > 0 && text[i] === text[i - 1]) {
+                    char.classList.add("vis-text-accent");
+                }
+                plaintextRow.appendChild(char);
+            }
+            vis.insertBefore(plaintextRow, gridEl);
+            animate(plaintextRow, "fadeIn", 300);
+            await sleep(500);
+
+            const cipherRow = createElement("box");
+            cipherRow.classList.add("vis-mt-md");
+            vis.appendChild(cipherRow);
+
+            let i = 0;
+            const digraphs = [];
+            while (i < text.length) {
+                const first = text[i];
+                const second = (i + 1 < text.length && text[i + 1] !== first) ? text[i + 1] : 'X';
+
+                digraphs.push([first, second]);
+                i += (second === 'X' && i + 1 < text.length) ? 1 : 2;
+            }
+
+            for (const [idx, [a, b]] of digraphs.entries()) {
+                const posA = findPosition(a, grid);
+                const posB = findPosition(b, grid);
+
+                const cells = gridEl.children;
+                const cellA = cells[posA.row * 5 + posA.col];
+                const cellB = cells[posB.row * 5 + posB.col];
+                let cipherA, cipherB;
+
+                highlightPlayfairCells(gridEl, posA, posB, grid);
+                animate(cellA, "shake", 300);
+                animate(cellB, "shake", 300);
+                await sleep(800);
+                yield vis;
+
+
+                if (posA.row === posB.row) {
+                    // Same row - shift right
+
+                    cipherA = grid[posA.row][(posA.col + 1) % 5];
+                    cipherB = grid[posB.row][(posB.col + 1) % 5];
+                    const resultCellA = cells[posA.row * 5 + (posA.col + 1) % 5];
+                    const resultCellB = cells[posB.row * 5 + (posB.col + 1) % 5];
+
+                    const finalA = createElement("box", cipherA);
+                    finalA.classList.add("vis-char", "ciphertext");
+                    cipherRow.appendChild(finalA);
+
+                    animate(resultCellA, "glow", 500);
+                    animate(finalA, "slideIn", 500);
+
+                    await sleep(200);
+
+                    const finalB = createElement("box", cipherB);
+                    finalB.classList.add("vis-char", "ciphertext");
+                    cipherRow.appendChild(finalB);
+
+                    animate(resultCellB, "glow", 500);
+                    animate(finalB, "slideIn", 500);
+
+                    await sleep(200);
+
+                } else if (posA.col === posB.col) {
+                    // Same column - shift down
+
+                    cipherA = grid[(posA.row + 1) % 5][posA.col];
+                    cipherB = grid[(posB.row + 1) % 5][posB.col];
+                    const resultCellA = cells[(posA.row + 1) % 5 * 5 + posA.col];
+                    const resultCellB = cells[(posB.row + 1) % 5 * 5 + posB.col];
+
+                    const finalA = createElement("box", cipherA);
+                    finalA.classList.add("vis-char", "ciphertext");
+                    cipherRow.appendChild(finalA);
+
+                    animate(resultCellA, "glow", 500);
+                    animate(finalA, "fadeIn", 500);
+
+                    await sleep(200);
+
+                    const finalB = createElement("box", cipherB);
+                    finalB.classList.add("vis-char", "ciphertext");
+                    cipherRow.appendChild(finalB);
+
+                    animate(resultCellB, "glow", 300);
+                    animate(finalB, "fadeIn", 500);
+
+                    await sleep(200);
+
+                } else {
+                    // Rectangle - swap columns
+
+                    cipherA = grid[posA.row][posB.col];
+                    cipherB = grid[posB.row][posA.col];
+                    const resultCellA = cells[posA.row * 5 + posB.col];
+                    const resultCellB = cells[posB.row * 5 + posA.col];
+
+                    const finalA = createElement("box", cipherA);
+                    finalA.classList.add("vis-char", "ciphertext");
+                    cipherRow.appendChild(finalA);
+
+                    animate(resultCellA, "glow", 500);
+                    animate(finalA, "slideIn", 500);
+
+                    await sleep(1000);
+
+                    const finalB = createElement("box", cipherB);
+                    finalB.classList.add("vis-char", "ciphertext");
+                    cipherRow.appendChild(finalB);
+
+                    animate(resultCellB, "glow", 500);
+                    animate(finalB, "slideIn", 500);
+
+                    await sleep(1000);
+                }
+
+                yield vis;
+
+                clearPlayfairHighlights(gridEl);
+            }
+
+            animate(cipherRow, "glow", 1000);
+            yield vis;
+        },
+
+        decrypt: async function*(ciphertext, { keyword }) {
+            const vis = createElement("visualizer");
+            yield vis;
+
+            const cleanKey = keyword.toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+            const text = ciphertext.toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+
+            const grid = generatePlayfairGrid(cleanKey);
+            const gridEl = createPlayfairGrid(grid);
+            vis.appendChild(gridEl);
+            yield vis;
+
+            const plaintextRow = createElement("raw-container");
+            plaintextRow.classList.add("vis-mb-md");
+            for (let i = 0; i < text.length; i++) {
+                const char = createElement("box", text[i]);
+                char.classList.add("vis-char", "plaintext", "borderless");
+                if (i > 0 && text[i] === text[i - 1]) {
+                    char.classList.add("vis-text-accent");
+                }
+                plaintextRow.appendChild(char);
+            }
+            vis.insertBefore(plaintextRow, gridEl);
+            animate(plaintextRow, "fadeIn", 300);
+            await sleep(500);
+
+            const cipherRow = createElement("box");
+            cipherRow.classList.add("vis-mt-md");
+            vis.appendChild(cipherRow);
+
+            let i = 0;
+            const digraphs = [];
+            while (i < text.length) {
+                const first = text[i];
+                const second = (i + 1 < text.length && text[i + 1] !== first) ? text[i + 1] : 'X';
+
+                digraphs.push([first, second]);
+                i += (second === 'X' && i + 1 < text.length) ? 1 : 2;
+            }
+
+            for (const [idx, [a, b]] of digraphs.entries()) {
+                const posA = findPosition(a, grid);
+                const posB = findPosition(b, grid);
+
+                const cells = gridEl.children;
+                const cellA = cells[posA.row * 5 + posA.col];
+                const cellB = cells[posB.row * 5 + posB.col];
+                let cipherA, cipherB;
+
+                highlightPlayfairCells(gridEl, posA, posB, grid);
+                animate(cellA, "shake", 300);
+                animate(cellB, "shake", 300);
+                await sleep(800);
+                yield vis;
+
+
+                if (posA.row === posB.row) {
+                    // Same row - shift right
+
+                    cipherA = grid[posA.row][(posA.col + 4) % 5];
+                    cipherB = grid[posB.row][(posB.col + 4) % 5];
+                    const resultCellA = cells[posA.row * 5 + (posA.col + 4) % 5];
+                    const resultCellB = cells[posB.row * 5 + (posB.col + 4) % 5];
+
+                    const finalA = createElement("box", cipherA);
+                    finalA.classList.add("vis-char", "ciphertext");
+                    cipherRow.appendChild(finalA);
+
+                    animate(resultCellA, "glow", 500);
+                    animate(finalA, "slideIn", 500);
+
+                    await sleep(200);
+
+                    const finalB = createElement("box", cipherB);
+                    finalB.classList.add("vis-char", "ciphertext");
+                    cipherRow.appendChild(finalB);
+
+                    animate(resultCellB, "glow", 500);
+                    animate(finalB, "slideIn", 500);
+
+                    await sleep(200);
+
+                } else if (posA.col === posB.col) {
+                    // Same column - shift down
+
+                    cipherA = grid[(posA.row + 4) % 5][posA.col];
+                    cipherB = grid[(posB.row + 4) % 5][posB.col];
+                    const resultCellA = cells[(posA.row + 4) % 5 * 5 + posA.col];
+                    const resultCellB = cells[(posB.row + 4) % 5 * 5 + posB.col];
+
+                    const finalA = createElement("box", cipherA);
+                    finalA.classList.add("vis-char", "ciphertext");
+                    cipherRow.appendChild(finalA);
+
+                    animate(resultCellA, "glow", 500);
+                    animate(finalA, "fadeIn", 500);
+
+                    await sleep(200);
+
+                    const finalB = createElement("box", cipherB);
+                    finalB.classList.add("vis-char", "ciphertext");
+                    cipherRow.appendChild(finalB);
+
+                    animate(resultCellB, "glow", 300);
+                    animate(finalB, "fadeIn", 500);
+
+                    await sleep(200);
+
+                } else {
+                    // Rectangle - swap columns
+
+                    cipherA = grid[posA.row][posB.col];
+                    cipherB = grid[posB.row][posA.col];
+                    const resultCellA = cells[posA.row * 5 + posB.col];
+                    const resultCellB = cells[posB.row * 5 + posA.col];
+
+                    const finalA = createElement("box", cipherA);
+                    finalA.classList.add("vis-char", "ciphertext");
+                    cipherRow.appendChild(finalA);
+
+                    animate(resultCellA, "glow", 500);
+                    animate(finalA, "slideIn", 500);
+
+                    await sleep(1000);
+
+                    const finalB = createElement("box", cipherB);
+                    finalB.classList.add("vis-char", "ciphertext");
+                    cipherRow.appendChild(finalB);
+
+                    animate(resultCellB, "glow", 500);
+                    animate(finalB, "slideIn", 500);
+
+                    await sleep(1000);
+                }
+
+                yield vis;
+
+                clearPlayfairHighlights(gridEl);
+            }
+
+            animate(cipherRow, "glow", 1000);
+            yield vis;
+        }
     },
     vernam: {
     },
